@@ -1,0 +1,331 @@
+---
+title: "Tutorial 5: Graphs"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(quantsUL)
+library(ggplot2)
+library(stringr)
+library(reshape2)
+library(dplyr)
+
+bairoch <- melt(Bairoch_1988, id.vars = c("country","city"))
+bairoch$year <- as.numeric(str_extract(bairoch$variable, "[0-9]+"))
+bairoch$population <- as.numeric(bairoch$value)*1000
+bairoch$value <- NULL
+bairoch$variable <- NULL
+
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+## ggplot2
+
+***This tutorial is intended to start plotting in R using the package ggplots2. Please see Wickham et al's book 'ggplot2: Elegant Graphics for Data Analysis' for more background and tips (https://ggplot2-book.org). Use the 'R Graphics Cookbook' to explore different graphs quickly:  https://r-graphics.org/.***
+
+***I have loaded the following packages into this tutorial: quantsUL, stringr, dplyr, and ggplot2.***
+
+ggplot2 (principle is based on The Grammar of Graphics by Leland Wilkinson (1999), therefore the 'gg')  offers a systematic and comprehensive way to create common and novel graphs including histograms, scatter plots, or maps.
+
+The basic principle is to iteratively define _layers_. For instance, we may first define the relevant variables, then the type of plot before fine tuning colours and labels.
+
+I have added a dataset on population size of European cities based on "La Population Des Villes Europeennes" (Bairoch, Batou, Chevre 1988). The name of the data is `bairoch`. 
+
+Press run to show the first observations (rows). 
+
+Can you change the code to display only observations from Ireland?
+
+
+```{r Daten, exercise=TRUE}
+
+head(bairoch)
+
+```
+```{r Daten-solution}
+
+# only Ireland
+head(bairoch[bairoch$country=="Ireland",])
+
+# dplyr alternative
+bairoch |> 
+  filter(country=="Ireland") |> 
+  head()
+
+```
+
+In addition, can you change the code to display only observations from Ireland without rows that have no information (`NA` for population)?
+
+*Hint: `is.na(bairoch$population)` creates a vector that is TRUE if population is NA and FALSE otherwise.*
+
+```{r Daten2, exercise=TRUE}
+
+head(bairoch)
+
+```
+```{r Daten2-solution}
+
+# only Ireland and population is not NA
+head(bairoch[bairoch$country=="Ireland" & !is.na(bairoch$population),]) 
+
+# dplyr alternative
+bairoch |> 
+  filter(country=="Ireland" & !is.na(bairoch$population)) |> 
+  head()
+
+```
+
+We will now plot the population of Limerick over time. We start with the function `ggplot()`to create the basic ggplot layer. Next we add a layer for points that represent years on the x-axis and population on the y axis using the  function `geom_point()`. The function `aes` is a helper function that maps the variables to visual properties, in this instance the position along the x and y-axis. We will look a this function later again.
+
+Multiple layers are combined with the plus sign.
+
+```{r Dortmund, exercise=TRUE}
+# subset the data to complete observations for Limerick
+Limerick <- bairoch |> filter(city=="Limerick" & !is.na(bairoch$population)) 
+
+# create plot as R object
+LimerickPlot <- ggplot(data = Limerick) + # base layer
+  geom_point(mapping = aes(x=year, y=population)) # add points for year and population
+
+# output plot
+LimerickPlot
+```
+
+Now ,we want to add another layer to our plot to connect the dots with lines. Since we will use the same x and y axis for points and for lines, we move the `aes()` function to the first, base layer.
+
+```{r Dortmund2, exercise=TRUE}
+# create data subset
+Limerick <- bairoch |> filter(city=="Limerick" & !is.na(bairoch$population)) 
+
+# create plot and output directly 
+ggplot(data = Limerick, mapping = aes(x=year, y=population)) +
+  geom_point() +
+  geom_line()
+
+```
+
+
+## Groups
+
+We want to plot the data for multiple cities in the same plot. To keep the observations separate, we have to tell data what rows belongs to what group (city). Using again the `aes` function, we create groups from the data based on the variable `city`.
+
+```{r group, exercise=TRUE}
+# create data subset
+Limerick <- bairoch |> filter(city %in% c("Limerick", "Cork", "Galway") & !is.na(bairoch$population)) 
+
+# group by city
+cityPlot <- ggplot(data=Limerick, mapping = aes(x=year, y=population, group=city)) + 
+  geom_point() +
+  geom_line() 
+
+cityPlot
+```
+
+To distinguish the observation points and lines, we need to add more visual properties such as colour or shape using the `aes()` function. Once we use colour, R knows how to group the observations so we can leave out the group argument.
+
+```{r color, exercise=TRUE}
+
+# create data subset
+Limerick <- bairoch |> filter(city %in% c("Limerick", "Cork", "Galway") & !is.na(bairoch$population)) 
+
+# replace group with colour in aes function
+cityPlot <- ggplot(data=Limerick, mapping=aes(x=year, y=population, colour=city)) +
+  geom_point() +
+  geom_line() 
+
+cityPlot
+
+```
+
+We can also use more than one visual property to distinguish groups. Visual properties that are not differentiated by variable can be placed outside the `aes()` function
+
+```{r color2, exercise=TRUE}
+
+# create data subset
+Limerick <- bairoch |> filter(city %in% c("Limerick", "Cork", "Galway") & !is.na(bairoch$population)) 
+
+# change point shape by city
+ggplot(data=Limerick, mapping=aes(x=year, y=population, colour=city)) +
+  geom_point(aes(shape=city)) +
+  geom_line() 
+
+# increase dot size 
+ggplot(data=Limerick, mapping=aes(x=year, y=population, colour=city)) +
+  geom_point(mapping=aes(shape=city), size=3) +
+  geom_line() 
+
+```
+
+An alternative approach is to use the layer `facet_wrap()` to create separate plots by group.
+
+```{r facet, exercise=TRUE}
+
+# create data subset
+Limerick <- bairoch |> filter(city %in% c("Limerick", "Cork", "Galway") & !is.na(bairoch$population)) 
+
+# use facet_wrap to create plot by one or two groups (2nd group goes before ~)
+ggplot(data=Limerick, mapping=aes(x=year, y=population)) +
+  geom_point() +
+  geom_line() +
+  facet_wrap(facets = ~ city)
+
+```
+
+It depends on the plot type, data, and our focus what method to plot multiple groups is preferable.
+
+
+## Graphical parameters
+
+After deciding on a graph type, we can add more layers to improve clarity and aesthetics. For instance, we can relabel the axis and move the legend to the bottom
+
+```{r labs, exercise=TRUE}
+
+# create data subset
+Limerick <- bairoch |> filter(city %in% c("Limerick", "Cork", "Galway") & !is.na(bairoch$population)) 
+
+# add lab titles and move the legend
+ggplot(Limerick, aes(x=year, y=population, colour=city)) +
+  geom_point(aes(shape=city)) +
+  geom_line(aes(linetype=city)) +
+  labs(x="Year", y="Population", colour="", shape="", linetype="") +
+  theme(legend.position = "bottom")
+
+
+```
+
+
+You will find a huge variety of options online or in the afore mentioned book https://r-graphics.org/. For instance, you can use the same style as the BBC: https://bbc.github.io/rcookbook/.
+
+The package `viridis` offers colour combination that help, ofr instance, to differentiate colours for people with colour blindness or if printed black and white. 
+
+We will also use a black and white theme instead of the standard ggplot colour layout (`theme_bw`).
+
+```{r vir, exercise=TRUE}
+
+library(viridis)
+# create data subset
+Limerick <- bairoch |> filter(city %in% c("Limerick", "Cork", "Galway") & !is.na(bairoch$population)) 
+
+# add theme_bw() and scale_color_viridis_d, note that theme() needs to be called after theme_bw
+ggplot(Limerick, aes(x=year, y=population, colour=city)) +
+  geom_point(aes(shape=city)) +
+  geom_line(aes(linetype=city)) +
+  labs(x="Year", y="Population", colour="", shape="", linetype="") +
+  theme_bw() +
+  scale_color_viridis_d() +
+  theme(legend.position = "bottom") 
+
+
+```
+
+As a final exercise, we will change the type of plot. Importantly, the principles introduced so far apply almost all types of plots, for instance histograms or barplots. Explore the options at https://r-graphics.org/ and online, for instance via Google Images.
+
+```{r hist, exercise=TRUE}
+
+ggplot(bairoch, aes(population)) +
+    geom_histogram()
+
+
+```
+
+The difficult is different to read. Can you improve the plot? You can see the parameters in the help file (`?geom_histogram`)? Or would you rather use a different type of plot?
+
+
+## Dealing with data problems
+
+The main difficulty (beside picking the plot type) often lies in the data preparation. `ggplot` requires the data to be in a certain format. A common task is to summarise data before plotting. The functions `aggregate` (base R) or `summarise` (dplyr) can help.
+
+We had seen the subset of rows for Ireland in the beginning of this tutorial. 
+
+```{r agg0, exercise=TRUE}
+bairoch |> 
+  filter(country=="Ireland" & !is.na(population)) 
+```
+
+Can you sum up the (urban) population by year similar to the last tutorial?
+
+*Data caveat: All cities have years without population information, the aggregates are not the full urban population.*
+
+```{r agg, exercise=TRUE}
+
+
+```
+```{r agg-solution}
+
+# base R
+aggIrl_1 <- aggregate(population ~ year, 
+                      data=bairoch[bairoch$country=="Ireland" & !is.na(bairoch$population),], 
+                      FUN=sum)
+aggIrl_1
+
+# dplyr
+aggIrl_2 <- bairoch |> 
+  filter(country=="Ireland" & !is.na(population)) |> 
+  group_by(year) |> 
+  summarise(population = sum(population))
+aggIrl_2
+```
+
+We can then plot the aggregates over time. 
+
+```{r aggPlot, exercise=TRUE}
+aggIrl <- bairoch |> 
+  filter(country=="Ireland" & !is.na(population)) |> 
+  group_by(year) |> 
+  summarise(population = sum(population))
+
+ggplot(aggIrl, aes(x=year, y=population)) +
+  geom_point() +
+  geom_line() +
+  theme_bw() +
+  labs(y="urban population")
+
+```
+
+We can use the same approach to aggregate over more variables, for instance year and country.
+
+```{r agg2, exercise=TRUE}
+
+# base R
+aggIrl_1 <- aggregate(population ~ year + country, 
+                      data=bairoch[bairoch$country %in% c("Ireland", "Portugal") & !is.na(bairoch$population),], 
+                      FUN=sum)
+aggIrl_1
+
+# dplyr
+aggIrl_2 <- bairoch |> 
+  filter(country %in% c("Ireland", "Portugal") & !is.na(population)) |> 
+  group_by(year, country) |> 
+  summarise(population = sum(population))
+aggIrl_2
+```
+
+Often, it is easier to restrict the sample later, for instance, if we want to explore multiple country combinations. 
+
+Try different combinations of countries in the code below and check the effect of changing, for instance, the labels or theme.
+
+```{r aggPlot2, exercise=TRUE}
+# aggregate
+aggIrl <- bairoch |> 
+  filter(!is.na(population)) |> 
+  group_by(country, year) |> 
+  summarise(population = sum(population))
+
+# print name of all countries in data
+unique(aggIrl$country)
+
+# plot population over time by countries for comparison 
+
+aggIrl |> 
+  filter(country %in% c("France", "Spain", "Great Britain")) |> 
+  ggplot(aes(x=year, y=population, colour=country)) +
+    geom_point(aes(shape=country)) +
+    geom_line() +
+    scale_colour_viridis_d() +
+    theme_bw() +
+    labs(y="urban population", colour="", shape="")
+
+```
+

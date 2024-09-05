@@ -1,0 +1,175 @@
+---
+title: "Tutorial 4: Functions and pipelines"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(quantsUL)
+library(stringr)
+library(dplyr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+##  Functions
+
+We have already applied and even written our own function in the first tutorial. In this tutorial, we take a more in-depth look at functions and learn how to apply multiple functions efficiently to subset data and caculate group-specific statistics.
+
+Recall the function from the first tutorial. $f$ calculates a numerical output depending on a variable input $x$: $f(x)=4x+3$. 
+
+
+```{r FunktionBsp, exercise=TRUE}
+
+linearFunction <- function(x){
+  4*x + 3
+}
+
+linearFunction(x =2)
+linearFunction(2)
+```
+
+This function has one argument, called x. We can easily write a function with two arguments, for instance the mean of two numbers called red and blue. f(red, blue)= (red + blue)/2. 
+
+If we do not want perform all calculations in one line, we can save intermediate results as done in the function `mean2` below. These intermediate objects are only created within the function environment and will not appear outside the function.
+
+```{r f2, exercise=TRUE}
+
+mean2 <- function(red, blue){
+  sum <- red+blue
+  mean <- sum/2
+  mean
+}
+
+mean2(red=2, blue = 4)
+```
+
+If you want to find out what a function does or what arguments it takes, just type ?function, for instance `?log`, in the console. 
+
+`log(x, base = exp(1))` calculates a logarithm with a specified base. Like many other functions, `log()` has a default setting for one of its arguments, that is the base is set to the `exp(1)` (Euler's number). 
+
+Change the base to 10 in the box below.
+
+```{r log, exercise=TRUE}
+
+log(5)
+```
+```{r log-solution}
+
+log(5, base = 10)
+```
+## Pipelines
+
+Often, we want to apply more than one function  to a dataset. A common case might be to first subset the data and then calculate a statistic. If we do not want to save all intermediate results, we can apply multiple functions at once. To make this approach more readable, the pipeline operator helps to separate out the different steps/functions.
+
+In the example below, we first change a vector to numeric, then calculate the natural logarithm of each number, and finally calculate the mean.
+
+```{r f3, exercise=TRUE}
+
+vec <- c('3', '5', '2', '8')
+vec2 <- as.numeric(vec)
+vec3 <- log(vec2)
+vec4 <- mean(vec3)
+vec4
+
+mean(log(as.numeric(vec)))
+```
+
+The first approach is very long and we either have to overwrite our initial vector or create new objects. The second approach becomes difficult to read quickly.
+
+An alternative approach would be to use a 'pipeline' operator. R has two pipeline operators, the relatively new base R operator `|>` and the older `%>%` from the `margittr` package (You will see both in online solutions). They are basically interchangeable.
+
+The next box demonstrates the approach. The output of each step is used as the first argument in the next step, that is `x |> f(y)` is the same as `f(x, y)`. 
+
+A quick way to type ` |> ` in RStduio is to press Ctrl, Shift and M at the same time (You can change in the settings (Code) whether you want the base or margittr pipeline operator). Type ?'|>' for more details.
+
+```{r f4, exercise=TRUE}
+
+vec <- c('3', '5', '2', '8')
+
+
+m <- vec |>
+  as.numeric() |> 
+  log() |> 
+  mean()
+  
+m
+
+
+```
+
+## dplyr
+
+`dplyr` is a an R package for data manipulation that makes heavy use of the pipeline structure.^[See https://dplyr.tidyverse.org/ or vignette("dplyr") in R] In this chapter, we will only look at the main structure and principles. https://r4ds.had.co.nz/transform.html provides a more in-depth introduction on the various functions and help.
+
+Remember the cleaned Limerick housing data used in Tutorial 2, that is all property price data fromLimerick between 2018 and 2022.
+
+```{r dat}
+limerick_property_df
+```
+
+Usaing base R and `dplyr`, we will now calculate the mean price for all observations from 2019. (The package `dplyr` is already called here, you would have to use 
+`library(dplyr)` first to replicate the code outside this tutorial.)
+
+```{r f5, exercise=TRUE}
+
+mean2019_base <- limerick_property_df[limerick_property_df$year == '2019', 'price'] |> 
+  mean() 
+
+mean2019_dplyr <- limerick_property_df |>
+  filter(year == '2019') |> 
+  summarise(mean = mean(price)) 
+
+mean2019_base
+mean2019_dplyr
+```
+
+`dplyr` makes code somewhat easier to read by making it more similar to natural language. This makes more complicated operations more approachable.
+
+A very useful application of the `dplyr` structure is calculating statistics by group using the `group_by()` function. The following code calculates mean price and number of observations by year.
+
+```{r f6, exercise=TRUE}
+
+mean2019_dplyr <- limerick_property_df |>
+  group_by(year) |> 
+  summarise(mean = mean(price), n=n()) 
+
+mean2019_dplyr
+```
+
+We can easily calculate more statistics by group and also add a filter. Can you calculate the (a) mean price, (b) median price, (c) price standard deviation, and (d) number of observations, each by year and only for observations under 500,000 euro?
+
+```{r f7, exercise=TRUE}
+
+```
+```{r f7-solution}
+
+under500k <- limerick_property_df |> 
+  filter(price<500000) |> 
+  group_by(year) |> 
+  summarise(mean=mean(price), median=median(price), std.dev=sd(price), n=n())
+
+under500k
+
+```
+
+
+Instead of creating a new data set for the summary statistics, you could replace the function `summarise` with `mutate` to add the new statistics as variables to the old data.frame. 
+
+Use the box below to create a new logical `TRUE`/`FALSE` variable. The new variable, called 'expensive' should have the value true if the price is larger than the median price of the year.
+
+```{r f8, exercise=TRUE}
+
+```
+```{r f8-solution}
+
+limerick_property_df <- limerick_property_df |> 
+  group_by(year) |> 
+  mutate(expensive = price > median(price))
+
+limerick_property_df
+
+```
+
+Run the tutorials ex-data-filter, ex-data-mutate, and ex-data-summarise in the `learnr` package for more tutorials on these operations. Type `learnr::run_tutorial(name = 'ex-data-filter', package = 'learnr')`, `learnr::run_tutorial(name = 'ex-data-mutate', package = 'learnr')`, or `learnr::run_tutorial(name = 'ex-data-summarise', package = 'learnr')`.

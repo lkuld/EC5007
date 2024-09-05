@@ -1,0 +1,189 @@
+---
+title: "Tutorial 1: Basics"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+##  R as a calculator
+
+*We start by using R for some simple calculations. You can write anything into the boxes and then press 'Run Code' to use R to execute the code.*
+
+Write random mathematical expressions (e.g. `2+2`), then click on 'Run Code'. Click on 'Start Over' to start afresh. What happens when you write two functions in the same line?
+
+```{r randomCalc, exercise=TRUE}
+
+```
+
+How do you calculate $5 \times (3+4)$ and $5^{(3+4)}$? Click on 'Hint' if you are stuck.
+
+```{r hoch, exercise=TRUE}
+
+```
+
+```{r hoch-hint}
+2*(2+5) # use brackets to order your calculation
+2*2+5 # The number or hash sign (#) indicates the beginning of a comment. R won't evaluate the rest of the line 
+2^3 # ^ is used for powers 
+2^(2+2)
+5^3
+```
+
+Basic mathematical operations such as adding and multiplying numbers have an intuitive implementation as shown above, for instance 2+2. The standard way to write a function is, however, 'function(a,b,...)', that is a word followed by arguments inside a bracket and separated by commas. For instance, 'sqrt(x)' calculates the square root of thr number x.
+
+What is the square root of 289? Click on 'Solution' to see the correct code. 
+
+```{r wurzel, exercise=TRUE}
+
+```
+
+```{r wurzel-solution}
+sqrt(289)
+```
+
+Try other functions such as log(x) for the natural logarithm of x and sum(x1, x2, x3, ...) for the sum of several numbers separated by comma. If you are not sure what a function does, you can call the help page for the function by preceding the function's name with a question mark, for instance '?sum'.
+
+## Objects, vectors, ...
+
+
+### Saving results
+
+For more complicated calculations, we usually want to store or retrieve data. In R, we can store data in various formats, we begin by saving the results from some calculations.
+
+Let's start by saving the number $2$ as an object with the name $x1$.^[In r,  we create the object 'x1' at the same time that we assign a value to it. In some programming languages, the object needs to be created first, before we can assign a value.] We can use an arrow (<-) or equal sign (=) to assign the value, that is `x1 <- 2` or `x1 = 2`.
+
+
+In the box below, the object x1 is created with the value 2. Add $3$ to x1, save the result as $y$. 
+
+
+```{r speicher, exercise=TRUE}
+ x1 <- 2
+```
+
+```{r speicher-solution}
+  x1 <- 2
+  y <- x1 + 3
+```
+
+So far we have defined two objects: x1 and y, but we have not seen any output as x1 and y are defined by the code but not printed. To print or output the content of an object, you can write the object's name (i.e. 'y' or 'x1') in a new line. Or, you can be more specific by writing 'print(x1)' and 'print(y)'.
+
+
+
+```{r Object, exercise=TRUE, exercise.preval=TRUE}
+x1 <- 2
+
+y <- x1 + 3
+```
+
+```{r Object-solution}
+x1 <- 2
+y <- x1 + 3
+
+x1
+y
+
+print(x1)
+print(y)
+```
+
+### Vectors
+
+In R, a vector is an ordered sequence of numbers or other data types. We will see how these properties are useful when we operate with more than just a few numbers.
+
+We can create a vector by combining a few numbers using the function 'c'. For instance 'x <- c(2,5,3,2)' creates a vector named x that contains the numbers 2, 5, 3, 2 in this order.
+
+```{r vector, exercise=TRUE, exercise.preval=TRUE}
+x <- c(2,5,3,2)
+
+x
+```
+
+
+Since the vector is ordered, we can select specific elements from the vector by referring to the position. This is done using square brackets after the vector's name, for instance 'x[2]'. Change the number around, what happens if you use a number larger than the length of the vector?
+
+```{r vector-pos, exercise=TRUE, exercise.preval=TRUE}
+x <- c(2,5,3,2)
+
+x[2]
+```
+
+Besides numbers, vectors can also contain different types of data, for instance words. Words ('character' data) are written using single or double quotation marks. The following box contains a vector with a few names, can you output just Mary?
+
+```{r vector-char, exercise=TRUE, exercise.preval=TRUE}
+x <- c('John', "Mary", "Helen")
+
+x
+```
+
+
+### Functions
+
+Functions are a different kind of object. A function takes an input and links it to a specific output. For instance, the following function $f$ calculates a numerical output depending on the input $x$: $f(x)=4x+3$. 
+
+To write longer code in multiple lines that we want to be executed together, we use curly brackets: `{}`.
+
+```{r FunktionBsp, exercise=TRUE}
+
+
+linearFunction <- function(x)  4*x + 3
+
+linearFunction2 <- function(x){
+  4*x + 3
+}
+
+linearFunction(2)
+linearFunction2(2)
+linearFunction(20)
+
+result <- linearFunction(2)
+result
+```
+
+
+Your turn: Write a function that takes an input named $x_1$ and gives as as output $x_1+3$, that is our function is defined as $f(x_1)=x_1+3$. The structure and name (plusThree) are already given in the box below.
+
+Complete the function and calculate $f(5)$.
+
+```{r Funktion, exercise=TRUE, exercise.preval=TRUE}
+plusThree <- function(x1){
+  
+}
+
+```
+
+```{r Funktion-solution}
+plusThree <- function(x1){
+  x1+3
+}
+
+plusThree(5)
+```
+
+Let's have a look at the components of a function. Run the code after each of these steps.
+
+1. Change the variable name 'x' to 'UL' in input and calculation
+2. Change the function's name
+3. Change the calculation inside the curly brackets
+4. Remove the curly brackets
+
+```{r Funktion2, exercise=TRUE, exercise.preval=TRUE}
+plusThree <- function(x){
+  x+3
+}
+
+plusThree(2)
+plusThree(99)
+```
+
+```{r Funktion2-solution}
+plus <- function(x)  UL*3 - 4
+
+plus(2)
+plus(99)
+```
+

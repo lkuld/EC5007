@@ -1,0 +1,147 @@
+---
+title: "Tutorial 3: Inspect and clean data"
+output: learnr::tutorial
+runtime: shiny_prerendered
+---
+
+```{r setup, include=FALSE}
+library(learnr)
+library(quantsUL)
+library(stringr)
+knitr::opts_chunk$set(echo = FALSE)
+```
+
+
+##  Inspect data
+
+The package `quantsUL` contains a raw data set of all listings in the Irish Residential Property Price Register in May 2023. 
+
+Our first goal is to understand the size of the dataset. In the box below, use the functions `length()`, `ncol()` and `nrow()` to understand the dimensions of the dataset, named `may23_df`. As a `data.frame` the length of `may23_df` is the same as the number of columns, while `length(may23_df[,1])` would give us the length of the first column (vector) of the dataset, that is the number of rows.
+
+Then use `head(may23_df)` to see the first rows of the data set. 
+
+```{r ex-1, exercise=TRUE}
+
+
+```
+```{r ex-1-solution}
+length(may23_df)
+ncol(may23_df)
+nrow(may23_df)
+length(may23_df[,1])
+
+```
+
+Next, use the function `summary()` with the name to of the dataset to obtain a summary of all vectors. You can also apply the function on individual vectors , for instance `summary(may23_df$County)`.
+
+```{r ex-2, exercise=TRUE}
+
+
+```
+
+The output tells you for all variables the same. The length of each vector is 5174 and that R automatically read in every vector as `character`. This seems appropriate for most of the variables, for example address or county.  Prices, however, should be numeric if we want to calculate statistics such as the mean price. In the following box, we force R to convert prices to a numeric variable.
+
+```{r ex-3, exercise=TRUE}
+may23_df$price_numeric <- as.numeric(may23_df$Price....)
+head(may23_df$price_numeric)
+```
+
+However, we receive a warning and all elements are outputted as NA, short for 'Not Available'
+
+Looking at the first observations of the original price vector (`head(may23_df$Price....)` or `may23_df$Price....[1:10]`), can you think of a reason why the vector is not numeric?
+
+```{r ex-4, exercise=TRUE}
+
+
+```
+
+R is rightfully conservative here: Since the original price data contains nun-numeric characters (a character not recognised in my encoding and a comma), it did not convert these to numeric values. If we think, these non-numeric values are safe to remove, we can, however, proceed. We will look, therefore, on how to clean the data.
+
+## Clean data
+
+We will clean our data using *regular expressions*.^[See https://en.wikipedia.org/wiki/Regular_expression.] Regular expressions are not R specific and are used in many instances that involve text, for example search engines. A regular expression is a sequence of characters that describes how to match text patterns. 
+
+For instance, we might want to search for the word 'recognise' in a text but also allow for alternative spellings ending in '-ize' or '-ise'. The regular expression 'recogni[sz]e' would match either case as the hard bracket symbolizes to match any of the characters inside.
+
+If we try to extract years from a text, '[0-9]{4}' would match any four digit number.  [0-9] is the same as [012345678] or [a-d] the same as [abcd] following the built in sequence of characters. The 4 in curly brackets signifies 4 times the preceding character(s). 
+
+As another example, '1[89][0-9]{2}' matches any number between 1800 and 1999. The expression can be read as follows: first a '1', then a 8 or 9, then two numbers between 0 and 9.
+
+Other regular explression options include the beginning of a character string, a new line, or specific pattern (not) to follow. A great resource to look up options and explore is the website https://www.regular-expressions.info.
+
+To use regular expressions in R, we will use the functions of the package `stringr`. The package provides functionality that simplifies dealing with text patterns. For instance, `str_detect(string, pattern)` outputs `TRUE` if the pattern is found in the string and `FALSE` otherwise. In the box below, can you change the function such that all elements are matched?
+
+```{r ex-5, exercise=TRUE}
+fruits <- c('apple', 'Apple')
+str_detect(string = fruits,pattern = '[Aa]pple')
+
+work <- c('labor', 'labour')
+str_detect(string = work,pattern = 'labor')
+
+```
+
+Returning to the property price register, we now want to extract all numeric values from the original price data. There are two ways to proceed: extract numbers or delete non-numeric characters. Here, we will implement the second approach. We will use the function `str_remove_all(string, pattern)` from the `stringr` package to delete all non-numeric characters. To match a non-numeric characters we use the negation pattern '[^notThese]'. The ^ changes the meaning of the hard bracket [] to none of the following characters, that is n, o, t, T, h, e, s' in the example. More usefully, [^0-9] matches any non-numeric character.
+
+Therefore, we can remove all non-numeric elements from the price data as follows.
+
+```{r ex-6, exercise=TRUE}
+may23_df$price_clean <- str_remove_all(string = may23_df$Price...., pattern = '[^0-9]')
+may23_df$price_numeric <- as.numeric(may23_df$price_clean)
+
+may23_df$price_numeric[1:15]
+```
+
+Can you use the same approach to extract all house numbers from the addresses? If not, why?
+
+### Variable names
+
+You might have noticed the awkward variable names generated by R. The function `names()` tells you all names associated with an object. While you should be careful, you can also change the variable names this way. For example, we could quickly remove (multiple) dots at the end of a name using `names(may23_df) <- str_remove(names(may23_df), '[.]+$')`.
+
+'[.]+$' looks complicated:  First we put the dot into hard brackets (or alternatively escape it with a '\') because '.' is a special regular expression that matches any character. Next the plus sign signifies that the preceding character (the dot) can be matched once or multiple times. Finally, the dollar sign signifies the end of a string as we only want to remove dots at the end of a name. 
+
+```{r ex-7, exercise=TRUE}
+names(may23_df)
+names(may23_df) <- str_remove(names(may23_df), '[.]+$')
+names(may23_df)
+```
+
+Can you use regular expression to extract all years from the date vector using the function `str_extract(string, pattern)`? Hint: the name changes made above are not carried over. If you are stuck, matching years was discussed a few lines up.
+
+```{r ex-8, exercise=TRUE}
+
+```
+
+```{r ex-8-solution}
+may23_df$year <- str_extract(may23_df$Date.of.Sale..dd.mm.yyyy., '[0-9]{4}')
+
+```
+
+You could also extract day and month this way, however, there are easier options.
+
+## Dates
+
+Another option to deal with the date vector is to use the built-in date format (there are alternative options using packages). 
+
+Have a look at the help option of the function `as.Date()` (type `?as.Date`). In the help article, we see that we can specify the date format in case that R does not output our dates properly. 
+
+Indeed, it messes up the dates. Therefore, we start by first printing a few dates to see whether we can recognise a pattern.
+
+```{r ex-9, exercise=TRUE}
+head(may23_df$Date.of.Sale..dd.mm.yyyy.)
+```
+
+This shows the dates are inputted as a two digit number for day of the month, a two digit number for the month, and a four digit number for the year. In addition, these are separated by '/'. 
+
+We can now transform our dates as follows (note the capital Y).
+
+```{r ex-10, exercise=TRUE}
+may23_df$date <- as.Date(x=may23_df$Date.of.Sale..dd.mm.yyyy., format= '%d/%m/%Y')
+head(may23_df$date)
+```
+
+The new format allows us to use some helpful functions, for instance to find the earliest date or, using additional packages, the month or day. Importantly, this will allow us to deal with the time dimension properly, for instance to plot a statistic over time.
+
+```{r ex-11, exercise=TRUE}
+may23_df$date <- as.Date(x=may23_df$Date.of.Sale..dd.mm.yyyy., format= '%d/%m/%Y')
+min(may23_df$date)
+```
