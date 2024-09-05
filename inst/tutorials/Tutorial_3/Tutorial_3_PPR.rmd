@@ -6,7 +6,7 @@ runtime: shiny_prerendered
 
 ```{r setup, include=FALSE}
 library(learnr)
-library(quantsUL)
+library(EC5007)
 library(stringr)
 knitr::opts_chunk$set(echo = FALSE)
 ```
@@ -14,7 +14,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ##  Inspect data
 
-The package `quantsUL` contains a raw data set of all listings in the Irish Residential Property Price Register in May 2023. 
+The package `EC5007` contains a raw data set of all listings in the Irish Residential Property Price Register in May 2023. 
 
 Our first goal is to understand the size of the dataset. In the box below, use the functions `length()`, `ncol()` and `nrow()` to understand the dimensions of the dataset, named `may23_df`. As a `data.frame` the length of `may23_df` is the same as the number of columns, while `length(may23_df[,1])` would give us the length of the first column (vector) of the dataset, that is the number of rows.
 

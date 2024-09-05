@@ -6,7 +6,7 @@ runtime: shiny_prerendered
 
 ```{r setup, include=FALSE}
 library(learnr)
-library(quantsUL)
+library(EC5007)
 library(ggplot2)
 library(stringr)
 library(reshape2)
@@ -26,7 +26,7 @@ knitr::opts_chunk$set(echo = FALSE)
 
 ***This tutorial is intended to start plotting in R using the package ggplots2. Please see Wickham et al's book 'ggplot2: Elegant Graphics for Data Analysis' for more background and tips (https://ggplot2-book.org). Use the 'R Graphics Cookbook' to explore different graphs quickly:  https://r-graphics.org/.***
 
-***I have loaded the following packages into this tutorial: quantsUL, stringr, dplyr, and ggplot2.***
+***I have loaded the following packages into this tutorial: EC5007, stringr, dplyr, and ggplot2.***
 
 ggplot2 (principle is based on The Grammar of Graphics by Leland Wilkinson (1999), therefore the 'gg')  offers a systematic and comprehensive way to create common and novel graphs including histograms, scatter plots, or maps.
 

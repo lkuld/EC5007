@@ -6,7 +6,7 @@ runtime: shiny_prerendered
 
 ```{r setup, include=FALSE}
 library(learnr)
-library(quantsUL)
+library(EC5007)
 library(stringr)
 library(dplyr)
 knitr::opts_chunk$set(echo = FALSE)
