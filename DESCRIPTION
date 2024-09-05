@@ -1,0 +1,17 @@
+Package: EC5007
+Title: Tutorials for UL
+Version: 0.0.0.9000
+Authors@R: 
+    person(given = "Lukas",
+           family = "Kuld",
+           role = c("aut", "cre"),
+           email = "lukas.kuld@ul.ie",
+           comment = c(ORCID = "YOUR-ORCID-ID"))
+Description: Tutorials for quantitative methods and data analysis at the University of Limerick
+License: MIT + file LICENSE
+Encoding: UTF-8
+LazyData: true
+Roxygen: list(markdown = TRUE)
+RoxygenNote: 7.1.1
+Depends: 
+    learnr
