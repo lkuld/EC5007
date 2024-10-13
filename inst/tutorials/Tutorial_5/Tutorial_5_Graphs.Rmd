@@ -34,7 +34,7 @@ The basic principle is to iteratively define _layers_. For instance, we may firs
 
 I have added a dataset on population size of European cities based on "La Population Des Villes Europeennes" (Bairoch, Batou, Chevre 1988). The name of the data is `bairoch`. 
 
-Press run to show the first observations (rows). 
+Press run below to show the first observations (rows). 
 
 Can you change the code to display only observations from Ireland?
 
@@ -198,7 +198,7 @@ ggplot(Limerick, aes(x=year, y=population, colour=city)) +
 
 You will find a huge variety of options online or in the afore mentioned book https://r-graphics.org/. For instance, you can use the same style as the BBC: https://bbc.github.io/rcookbook/.
 
-The package `viridis` offers colour combination that help, ofr instance, to differentiate colours for people with colour blindness or if printed black and white. 
+The package `viridis` offers colour combination that help, for instance, to differentiate colours for people with colour blindness or if printed black and white. 
 
 We will also use a black and white theme instead of the standard ggplot colour layout (`theme_bw`).
 
@@ -230,7 +230,7 @@ ggplot(bairoch, aes(population)) +
 
 ```
 
-The difficult is different to read. Can you improve the plot? You can see the parameters in the help file (`?geom_histogram`)? Or would you rather use a different type of plot?
+The difference between cities is difficult to see. Can you improve the plot? You can see the parameters in the help file (`?geom_histogram`)? Or would you rather use a different type of plot?
 
 
 ## Dealing with data problems
